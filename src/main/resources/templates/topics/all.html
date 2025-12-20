@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Topics</title>
+</head>
+<body>
+
+<h2>Topics</h2>
+
+<div th:replace="~{topics/tree :: topicTree(topics=${topics})}"></div>
+
+<a href="/topics/new">Добавить топик</a>
+
+</body>
+</html>

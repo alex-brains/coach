@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<ul th:fragment="topicTree(topics)">
+    <li th:each="topic : ${topics}">
+        <span th:text="${topic.name}"></span>
+
+        <div th:if="${!#lists.isEmpty(topic.children)}"
+             th:replace="~{topics/tree :: topicTree(topics=${topic.children})}">
+        </div>
+    </li>
+</ul>
+
+</body>
+</html>
