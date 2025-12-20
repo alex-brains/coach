@@ -22,7 +22,7 @@ CREATE TABLE languages_items(
     translation text        not null,
     example     text,
     created_at  timestamptz default now(),
-    constraint uq_topic_name_parent unique (language, word, type)
+    constraint uq_language_item unique (language, type, word)
 );
 
 create table srs_reviews(
