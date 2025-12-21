@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h2>Добавить слово / фразу</h2>
+
+<form th:action="@{/language-items}" th:object="${form}" method="post">
+
+    <label>Язык:</label>
+    <select th:field="*{language}">
+        <option value="EN">English</option>
+        <option value="DE">Deutsch</option>
+    </select>
+    <br/>
+
+    <label>Тип:</label>
+    <select th:field="*{type}">
+        <option value="WORD">Слово</option>
+        <option value="IRREGULAR_VERB">Неправильный глагол</option>
+        <option value="PHRASE">Фраза</option>
+    </select>
+    <br/>
+
+    <label>Топик:</label>
+    <select th:field="*{topicId}">
+        <option value="">— не задан —</option>
+        <option th:each="topic : ${allTopics}"
+                th:value="${topic.id}"
+                th:text="${topic.name}">
+        </option>
+    </select>
+    <br/>
+
+    <label>Слово / Фраза:</label><br/>
+    <input type="text" th:field="*{word}" size="60"/>
+    <br/>
+
+    <label>Перевод:</label><br/>
+    <textarea th:field="*{translation}" rows="3" cols="60"></textarea>
+    <br/>
+
+    <label>Пример:</label><br/>
+    <textarea th:field="*{example}" rows="3" cols="60"></textarea>
+    <br/>
+
+    <button type="submit">Сохранить</button>
+</form>
+
+</body>
+</html>

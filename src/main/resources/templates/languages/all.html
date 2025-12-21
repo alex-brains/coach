@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Language Items</title>
+</head>
+<body>
+
+<h2>Слова / фразы</h2>
+
+<a th:href="@{/language-items/new}">➕ Добавить</a>
+
+<table border="1" cellpadding="5">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Язык</th>
+        <th>Тип</th>
+        <th>Слово / Фраза</th>
+        <th>Перевод</th>
+        <th>Пример употребления</th>
+        <th>Топик</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="item : ${items}">
+        <td th:text="${item.id}"></td>
+        <td th:text="${item.language}"></td>
+        <td th:text="${item.type}"></td>
+        <td th:text="${item.word}"></td>
+        <td th:text="${item.translation}"></td>
+        <td th:text="${item.example != null ? item.example : '-'}"></td>
+        <td th:text="${item.topic != null ? item.topic.name : '-'}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
