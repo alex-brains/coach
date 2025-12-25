@@ -1,6 +1,6 @@
 package by.alex.coach.service;
 
-import by.alex.coach.dto.TopicOptionDto;
+import by.alex.coach.dto.topic.TopicViewDto;
 import by.alex.coach.models.Topic;
 import by.alex.coach.repository.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,8 @@ public class TopicTreeService {
         this.topicRepository = topicRepository;
     }
 
-    public List<TopicOptionDto> getAllAsTree() {
-        List<TopicOptionDto> result = new ArrayList<>();
+    public List<TopicViewDto> getAllAsTree() {
+        List<TopicViewDto> result = new ArrayList<>();
         for (Topic root: topicRepository.findByParentIsNull()) {
             walk(root, 0, result);
         }
@@ -29,8 +29,8 @@ public class TopicTreeService {
         return result;
     }
 
-    private void walk(Topic topic, int level, List<TopicOptionDto> labels) {
-        labels.add(new TopicOptionDto(
+    private void walk(Topic topic, int level, List<TopicViewDto> labels) {
+        labels.add(new TopicViewDto(
                 topic.getId(),
                 "- ".repeat(level) + topic.getName()
         ));

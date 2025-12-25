@@ -8,39 +8,39 @@
 
 <h2>Вопросы</h2>
 
+<a href="/questions/new">➕ Добавить новый вопрос</a>
+<br/><br/>
+
 <form method="get" th:action="@{/questions}">
-    <label>Топик:</label>
     <select name="topicId">
         <option value="">— все топики —</option>
-        <option th:each="topic : ${allTopics}"
-                th:value="${topic.id}"
-                th:text="${topic.label}"
-                th:selected="${param.topicId == topic.id}">
+        <option th:each="t : ${allTopics}"
+                th:value="${t.id}"
+                th:text="${t.label}"
+                th:selected="${t.id == selectedTopicId}">
         </option>
     </select>
     <button type="submit">Фильтр</button>
 </form>
 
-<br объяснение=""/>
+<hr/>
 
-<a th:href="@{/questions/new}">➕ Добавить</a>
-
-<table border="1" cellpadding="5">
-    <thead>
+<table border="1" cellpadding="6">
     <tr>
         <th>ID</th>
-        <th>Топик</th>
         <th>Вопрос</th>
+        <th>Топик</th>
+        <th>Дата</th>
     </tr>
-    </thead>
 
-    <tbody>
-    <tr th:each="question : ${questions}">
-        <td th:text="${question.id}"></td>
-        <td th:text="${question.topic != null ? question.topic.name : '—'}"></td>
-        <td th:text="${question.questionText}"></td>
+    <tr th:each="q : ${questions}">
+        <td>
+            <a th:href="@{'/questions/' + ${q.id}}" th:text="${q.id}"></a>
+        </td>
+        <td th:text="${q.question}"></td>
+        <td th:text="${q.topicName}"></td>
+        <td th:text="${#temporals.format(q.createdAt, 'dd.MM.yyyy')}"></td>
     </tr>
-    </tbody>
 </table>
 
 </body>

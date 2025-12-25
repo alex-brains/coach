@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Question</title>
+</head>
+<body>
+
+<h2>Редактировать вопрос</h2>
+
+<form th:action="@{'/questions/' + ${questionId}}" th:object="${form}" method="post">
+
+    <label>Топик:</label>
+    <select th:field="*{topicId}">
+        <option value="">— не задан —</option>
+        <option th:each="t : ${allTopics}"
+                th:value="${t.id}"
+                th:text="${t.label}">
+        </option>
+    </select>
+    <br/><br/>
+
+    <label>Вопрос:</label><br/>
+    <textarea th:field="*{questionText}" rows="3" cols="60"></textarea>
+    <br/>
+
+    <label>Ответ:</label><br/>
+    <textarea th:field="*{answerText}" rows="3" cols="60"></textarea>
+    <br/><br/>
+
+    <button type="submit">💾 Сохранить</button>
+    <a th:href="@{'/questions/' + ${questionId}}" style="margin-left: 20px;">Отмена</a>
+</form>
+
+</body>
+</html>

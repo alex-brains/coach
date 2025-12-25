@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>View Question</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</head>
+<body>
+
+<h2>Вопрос — #<span th:text="${question.id}"></span></h2>
+
+<p><b>Топик:</b> <span th:text="${question.topicName}"></span></p>
+<p><b>Создан:</b> <span th:text="${#temporals.format(question.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+<hr/>
+
+<h3>Вопрос:</h3>
+<p th:text="${question.question}"></p>
+
+<h3>Ответ:</h3>
+<pre><code class="language-java" th:text="${question.answer}"></code></pre>
+
+<br/>
+
+<a th:href="@{/questions}" style="margin-right: 20px;">← Назад к списку</a>
+<a th:href="@{'/questions/' + ${question.id} + '/edit'}">✏️ Редактировать</a>
+
+<form th:action="@{'/questions/' + ${question.id} + '/delete'}"
+      method="post"
+      style="display:inline;margin-left:20px;">
+    <button type="submit" onclick="return confirm('Удалить вопрос?')">🗑 Удалить</button>
+</form>
+
+</body>
+</html>

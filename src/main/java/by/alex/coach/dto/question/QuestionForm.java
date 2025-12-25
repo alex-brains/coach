@@ -1,4 +1,4 @@
-package by.alex.coach.dto;
+package by.alex.coach.dto.question;
 
 import jakarta.validation.constraints.NotBlank;
 
