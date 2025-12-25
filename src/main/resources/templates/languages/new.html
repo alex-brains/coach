@@ -30,7 +30,7 @@
         <option value="">— не задан —</option>
         <option th:each="topic : ${allTopics}"
                 th:value="${topic.id}"
-                th:text="${topic.name}">
+                th:text="${topic.label}">
         </option>
     </select>
     <br/>

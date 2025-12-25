@@ -4,6 +4,8 @@ import by.alex.coach.dto.LanguagesItemForm;
 import by.alex.coach.repository.LanguagesItemRepository;
 import by.alex.coach.repository.TopicRepository;
 import by.alex.coach.service.LanguagesItemService;
+import by.alex.coach.service.TopicTreeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +20,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class LanguageController {
     private final LanguagesItemService itemService;
     private final LanguagesItemRepository itemRepository;
-    private final TopicRepository topicRepository;
+    private final TopicTreeService treeService;
 
     @Autowired
-    public LanguageController(LanguagesItemService itemService, LanguagesItemRepository itemRepository, TopicRepository topicRepository) {
+    public LanguageController(LanguagesItemService itemService, LanguagesItemRepository itemRepository, TopicTreeService treeService) {
         this.itemService = itemService;
         this.itemRepository = itemRepository;
-        this.topicRepository = topicRepository;
+        this.treeService = treeService;
     }
 
     @GetMapping
@@ -38,16 +40,16 @@ public class LanguageController {
         model.addAttribute("form", new LanguagesItemForm(
                 null, "EN", "WORD", "", "", ""
         ));
-        model.addAttribute("allTopics", topicRepository.findAll());
+        model.addAttribute("allTopics", treeService.getAllAsTree());
         return "languages/new";
     }
 
     @PostMapping
-    public String create(@ModelAttribute LanguagesItemForm form,
+    public String create(@ModelAttribute @Valid LanguagesItemForm form,
                          BindingResult bindingResult,
                          Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("allTopics", topicRepository.findAll());
+            model.addAttribute("allTopics", treeService.getAllAsTree());
             return "languages/new";
         }
 

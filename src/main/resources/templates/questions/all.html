@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Questions</title>
+</head>
+<body>
+
+<h2>Вопросы</h2>
+
+<form method="get" th:action="@{/questions}">
+    <label>Топик:</label>
+    <select name="topicId">
+        <option value="">— все топики —</option>
+        <option th:each="topic : ${allTopics}"
+                th:value="${topic.id}"
+                th:text="${topic.label}"
+                th:selected="${param.topicId == topic.id}">
+        </option>
+    </select>
+    <button type="submit">Фильтр</button>
+</form>
+
+<br объяснение=""/>
+
+<a th:href="@{/questions/new}">➕ Добавить</a>
+
+<table border="1" cellpadding="5">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Топик</th>
+        <th>Вопрос</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="question : ${questions}">
+        <td th:text="${question.id}"></td>
+        <td th:text="${question.topic != null ? question.topic.name : '—'}"></td>
+        <td th:text="${question.questionText}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

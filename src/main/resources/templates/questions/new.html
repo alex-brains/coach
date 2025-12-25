@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h2>Добавить вопрос</h2>
+
+<form th:action="@{/questions}" th:object="${form}" method="post">
+
+    <label>Топик:</label>
+    <select th:field="*{topicId}" required>
+        <option value="">— выбрать —</option>
+        <option th:each="topic : ${allTopics}"
+                th:value="${topic.id}"
+                th:text="${topic.label}">
+        </option>
+    </select>
+    <br/>
+
+    <label>Вопрос:</label><br/>
+    <textarea th:field="*{questionText}" rows="4" cols="60"></textarea>
+    <br/>
+
+    <label>Ответ:</label><br/>
+    <textarea th:field="*{answerText}" rows="6" cols="60"></textarea>
+    <br/>
+
+    <button type="submit">Сохранить</button>
+</form>
+
+</body>
+</html>
