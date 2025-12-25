@@ -8,7 +8,6 @@ import by.alex.coach.service.TopicTreeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +39,7 @@ public class QuestionController {
 
     @GetMapping("/new")
     public String newForm(Model model) {
-        model.addAttribute("form", new QuestionForm(null, "", ""));
+        model.addAttribute("form", QuestionForm.empty());
         model.addAttribute("allTopics", treeService.getAllAsTree());
         return "questions/new";
     }
@@ -67,7 +66,11 @@ public class QuestionController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         QuestionViewDto dto = questionService.getQuestionById(id);
-        model.addAttribute("form", new QuestionForm(dto.topicId(), dto.question(), dto.answer()));
+
+        // Сериализуем answer в одну строку для textarea
+        String answerForEdit = dto.getAnswerTextForEdit();
+
+        model.addAttribute("form", new QuestionForm(dto.topicId(), dto.question(), answerForEdit));
         model.addAttribute("questionId", id);
         model.addAttribute("allTopics", treeService.getAllAsTree());
         return "questions/edit";

@@ -1,6 +1,11 @@
 package by.alex.coach.dto.question;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record QuestionForm(
         Long topicId,
@@ -10,4 +15,8 @@ public record QuestionForm(
 
         @NotBlank(message = "Answer text should not be empty")
         String answerText
-) {}
+) {
+        public static QuestionForm empty() {
+                return new QuestionForm(null, "", "");
+        }
+}

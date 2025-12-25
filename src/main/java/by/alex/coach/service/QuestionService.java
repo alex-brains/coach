@@ -1,8 +1,6 @@
 package by.alex.coach.service;
 
-import by.alex.coach.dto.question.QuestionForm;
-import by.alex.coach.dto.question.QuestionListDto;
-import by.alex.coach.dto.question.QuestionViewDto;
+import by.alex.coach.dto.question.*;
 import by.alex.coach.models.Question;
 
 import by.alex.coach.repository.QuestionRepository;
@@ -11,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -56,11 +56,53 @@ public class QuestionService {
         return new QuestionViewDto(
                 q.getId(),
                 q.getQuestionText(),
-                q.getAnswerText(),
+                autoSplit(q.getAnswerText()),
                 q.getTopic() != null ? q.getTopic().getId() : null,
                 q.getTopic() != null ? q.getTopic().getName() : null,
                 q.getCreatedAt()
         );
+    }
+
+    private List<AnswerBlockDto> autoSplit(String raw) {
+        List<AnswerBlockDto> blocks = new ArrayList<>();
+
+        String[] lines = raw.split("\\n");
+        StringBuilder current = new StringBuilder();
+        boolean currentIsCode = false;
+
+        for (String line : lines) {
+            boolean isCode = looksLikeCode(line);
+
+            // если тип меняется — фиксируем предыдущий блок
+            if (!current.isEmpty() && isCode != currentIsCode) {
+                blocks.add(new AnswerBlockDto(current.toString().trim(), currentIsCode));
+                current.setLength(0);
+            }
+
+            current.append(line).append("\n");
+            currentIsCode = isCode;
+        }
+
+        if (!current.isEmpty()) {
+            blocks.add(new AnswerBlockDto(current.toString().trim(), currentIsCode));
+        }
+
+        return blocks;
+    }
+
+    private boolean looksLikeCode(String text) {
+        String trimmed = text.trim();
+
+        return trimmed.contains("{")
+                || trimmed.contains("}")
+                || trimmed.contains(";")
+                || trimmed.startsWith("class ")
+                || trimmed.startsWith("public ")
+                || trimmed.startsWith("def ")
+                || trimmed.startsWith("function ")
+                || trimmed.matches("(?s).*\\n.*\\n.*") // 3+ строк
+                || trimmed.startsWith("    ")
+                || trimmed.startsWith("\t");
     }
 
     @Transactional

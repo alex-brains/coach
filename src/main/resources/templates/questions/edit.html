@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Edit Question</title>
@@ -25,7 +25,8 @@
     <br/>
 
     <label>Ответ:</label><br/>
-    <textarea th:field="*{answerText}" rows="3" cols="60"></textarea>
+    <textarea th:field="*{answerText}" rows="15" cols="80"
+              style="font-family: monospace; white-space: pre-wrap;"></textarea>
     <br/><br/>
 
     <button type="submit">💾 Сохранить</button>

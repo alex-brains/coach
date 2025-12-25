@@ -4,9 +4,37 @@
     <meta charset="UTF-8">
     <title>View Question</title>
 
+    <!-- Prism -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Prism.highlightAll();
+        });
+    </script>
+    <style>
+        /* Убираем серый фон Prism и делаем код как текст — на белом фоне */
+        pre[class*="language-"] {
+            background: white !important;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        code[class*="language-"] {
+            background: transparent !important;
+            font-size: 14px;
+        }
+
+        /* Текстовые блоки ответа */
+        .answer-text {
+            white-space: pre-wrap;
+            padding: 4px 0;
+            font-size: 15px;
+        }
+    </style>
 </head>
 <body>
 
@@ -20,7 +48,7 @@
 <p th:text="${question.question}"></p>
 
 <h3>Ответ:</h3>
-<pre><code class="language-java" th:text="${question.answer}"></code></pre>
+<div th:utext="${question.mergedCodeHtml}"></div>
 
 <br/>
 
