@@ -9,21 +9,37 @@
 <h2>Слова / фразы</h2>
 
 <a th:href="@{/language-items/new}">➕ Добавить</a>
+<br/><br/>
+
+<form method="get" th:action="@{/language-items}">
+    <select name="topicId">
+        <option value="">— все топики —</option>
+        <option th:each="t : ${allTopics}"
+                th:value="${t.id}"
+                th:text="${t.label}"
+                th:selected="${t.id == selectedTopicId}">
+        </option>
+    </select>
+    <button type="submit">Фильтр</button>
+</form>
+
+<hr/>
 
 <table border="1" cellpadding="5">
     <thead>
     <tr>
         <th>ID</th>
-        <th>Язык</th>
+        <!--<th>Язык</th>
         <th>Тип</th>
-        <th>Слово / Фраза</th>
+        <th>Слово / Фраза</th>-->
         <th>Перевод</th>
-        <th>Пример употребления</th>
+        <!--<th>Пример употребления</th>-->
         <th>Топик</th>
+        <th>Дата</th>
     </tr>
     </thead>
 
-    <tbody>
+    <!--<tbody>
     <tr th:each="item : ${items}">
         <td th:text="${item.id}"></td>
         <td th:text="${item.language}"></td>
@@ -33,7 +49,16 @@
         <td th:text="${item.example != null ? item.example : '-'}"></td>
         <td th:text="${item.topic != null ? item.topic.name : '-'}"></td>
     </tr>
-    </tbody>
+    </tbody>-->
+
+    <tr th:each="i : ${items}">
+        <td>
+            <a th:href="@{'/language-items/' + ${i.id}}" th:text="${i.id}"></a>
+        </td>
+        <td th:text="${i.translation}"></td>
+        <td th:text="${i.topicName}"></td>
+        <td th:text="${#temporals.format(i.createdAt, 'dd.MM.yyyy')}"></td>
+    </tr>
 </table>
 
 </body>

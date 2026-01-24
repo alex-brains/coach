@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View item</title>
+</head>
+<body>
+
+<h2>Элемент — №<span th:text="${item.id}"></span></h2>
+
+<p><b>Язык:</b> <span th:text="${item.language}"></span></p>
+<p><b>Тип:</b> <span th:text="${item.type}"></span></p>
+<p><b>Топик:</b> <span th:text="${item.topicId != null ? item.topicName : '—'}"></span></p>
+<p><b>Дата создания:</b> <span th:text="${#temporals.format(item.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>
+<hr/>
+
+<h3>Слово / фраза:</h3>
+<p th:text="${item.word}"></p>
+
+<h3>Перевод:</h3>
+<p th:text="${item.translation}"></p>
+
+<h3>Пример:</h3>
+<p th:text="${item.example != null ? item.example : '—'}"></p>
+
+</body>
+</html>

@@ -1,14 +1,18 @@
 package by.alex.coach.service;
 
-import by.alex.coach.dto.LanguagesItemForm;
+import by.alex.coach.dto.languages.LanguagesItemForm;
+import by.alex.coach.dto.languages.LanguagesItemListDto;
+import by.alex.coach.dto.languages.LanguagesItemViewDto;
+import by.alex.coach.dto.question.QuestionListDto;
+import by.alex.coach.dto.question.QuestionViewDto;
 import by.alex.coach.models.LanguagesItem;
-import by.alex.coach.models.Topic;
 import by.alex.coach.repository.LanguagesItemRepository;
 import by.alex.coach.repository.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,5 +46,29 @@ public class LanguagesItemService {
 
         languagesItemRepository.save(item);
         //reviewService.getOrCreate("LANGUAGE_ITEM", item.getId());
+    }
+
+    public List<LanguagesItemListDto> getAll() {
+        return languagesItemRepository.findAllForList();
+    }
+
+    public List<LanguagesItemListDto> getByTopic(Long topicId) {
+        return languagesItemRepository.findAllForListByTopic(topicId);
+    }
+
+    public LanguagesItemViewDto getItemsById(Long id) {
+        LanguagesItem item = languagesItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+        return new LanguagesItemViewDto(
+                item.getId(),
+                item.getLanguage(),
+                item.getType(),
+                item.getWord(),
+                item.getTranslation(),
+                item.getExample(),
+                item.getTopic() != null ? item.getTopic().getId() : null,
+                item.getTopic() != null ? item.getTopic().getName() : null,
+                item.getCreatedAt()
+        );
     }
 }
