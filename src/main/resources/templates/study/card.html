@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div th:if="${question != null}">
+    <p th:text="${question.questionText}"></p>
+    <details>
+        <summary>Показать ответ</summary>
+        <p th:text="${question.answerText}"></p>
+    </details>
+</div>
+
+<div th:if="${item != null}">
+    <p th:text="${item.word}"></p>
+    <details>
+        <summary>Перевод</summary>
+        <p th:text="${item.translation}"></p>
+        <p th:text="${item.example}"></p>
+    </details>
+</div>
+
+<form th:action="@{/study/{id}/correct(id=${review.id})}" method="post">
+    <button>Правильно</button>
+</form>
+
+<form th:action="@{/study/{id}/incorrect(id=${review.id})}" method="post">
+    <button>Неправильно</button>
+</form>
+
+</body>
+</html>

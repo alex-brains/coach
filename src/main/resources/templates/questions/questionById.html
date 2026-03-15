@@ -38,7 +38,7 @@
 </head>
 <body>
 
-<h2>Вопрос — #<span th:text="${question.id}"></span></h2>
+<h2>Вопрос — №<span th:text="${question.id}"></span></h2>
 
 <p><b>Топик:</b> <span th:text="${question.topicName}"></span></p>
 <p><b>Создан:</b> <span th:text="${#temporals.format(question.createdAt, 'dd.MM.yyyy HH:mm')}"></span></p>

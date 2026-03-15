@@ -3,15 +3,14 @@ package by.alex.coach.service;
 import by.alex.coach.dto.question.*;
 import by.alex.coach.models.Question;
 
+import by.alex.coach.models.Topic;
 import by.alex.coach.repository.QuestionRepository;
 import by.alex.coach.repository.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +46,23 @@ public class QuestionService {
     }
 
     public List<QuestionListDto> getByTopic(Long topicId) {
-        return questionRepository.findAllForListByTopic(topicId);
+        Topic root = topicRepository.findById(topicId)
+                .orElseThrow();
+
+        Set<Long> topicIds = collectTopicIds(root);
+
+        return questionRepository.findAllForListByTopics(topicIds);
+    }
+
+    private Set<Long> collectTopicIds(Topic topic) {
+        Set<Long> ids = new HashSet<>();
+        ids.add(topic.getId());
+
+        for (Topic child : topic.getChildren()) {
+            ids.addAll(collectTopicIds(child));
+        }
+
+        return ids;
     }
 
     public QuestionViewDto getQuestionById(Long id) {
