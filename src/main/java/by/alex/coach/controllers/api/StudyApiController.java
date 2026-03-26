@@ -32,22 +32,18 @@ public class StudyApiController {
         this.mediaService = mediaService;
     }
 
-    /**
-     * GET /api/v1/study/next
-     * GET /api/v1/study/next?itemType=QUESTION
-     * GET /api/v1/study/next?itemType=QUESTION&topicId=1
-     * GET /api/v1/study/next?itemType=LANGUAGE_ITEM&topicId=4
-     */
     @GetMapping("/next")
     public ResponseEntity<Map<String, Object>> next(
             @RequestParam(required = false) String itemType,
             @RequestParam(required = false) Long topicId
     ) {
         SrsReview review = reviewService.nextDue(itemType, topicId).orElse(null);
-        long dueCount = reviewService.countDue(itemType);
+
+        // Счётчик учитывает оба фильтра
+        long dueCount = reviewService.countDue(itemType, topicId);
 
         if (review == null) {
-            return ResponseEntity.ok(Map.of("dueCount", 0));
+            return ResponseEntity.ok(Map.of("dueCount", dueCount));
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -76,7 +72,6 @@ public class StudyApiController {
             ));
         }
 
-        // Медиа — только id и url
         List<Map<String, Object>> media = mediaService
                 .getByItem(review.getItemType(), review.getItemId())
                 .stream()
@@ -117,9 +112,9 @@ public class StudyApiController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> stats() {
         return ResponseEntity.ok(Map.of(
-                "dueAll", reviewService.countDue(null),
-                "dueQuestions", reviewService.countDue("QUESTION"),
-                "dueLanguage", reviewService.countDue("LANGUAGE_ITEM")
+                "dueAll", reviewService.countDue(null, null),
+                "dueQuestions", reviewService.countDue("QUESTION", null),
+                "dueLanguage", reviewService.countDue("LANGUAGE_ITEM", null)
         ));
     }
 }

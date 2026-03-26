@@ -20,8 +20,9 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final SrsReviewService reviewService;
 
-    @Autowired
-    public QuestionService(TopicRepository topicRepository, QuestionRepository questionRepository, SrsReviewService reviewService) {
+    public QuestionService(TopicRepository topicRepository,
+                           QuestionRepository questionRepository,
+                           SrsReviewService reviewService) {
         this.topicRepository = topicRepository;
         this.questionRepository = questionRepository;
         this.reviewService = reviewService;
@@ -31,14 +32,35 @@ public class QuestionService {
     public void create(QuestionForm form) {
         Question question = new Question();
         question.setTopic(Optional.ofNullable(form.topicId())
-                .map(topicId -> topicRepository.findById(topicId)
-                        .orElseThrow(() -> new IllegalArgumentException("Topic is not found")))
+                .map(id -> topicRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Topic not found: " + id)))
                 .orElse(null));
         question.setQuestionText(form.questionText());
         question.setAnswerText(form.answerText());
 
         questionRepository.save(question);
-        //reviewService.getOrCreate("QUESTION", question.getId());
+
+        // Автоматически создаём SRS-запись — карточка сразу попадает в очередь изучения
+        reviewService.getOrCreate("QUESTION", question.getId());
+    }
+
+    @Transactional
+    public void update(Long id, QuestionForm form) {
+        Question q = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Question not found: " + id));
+
+        q.setQuestionText(form.questionText());
+        q.setAnswerText(form.answerText());
+        q.setTopic(form.topicId() != null
+                ? topicRepository.findById(form.topicId()).orElse(null)
+                : null);
+        // SRS запись не трогаем при редактировании вопроса
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        // При удалении вопроса удаляем и SRS-запись (cascade или вручную)
+        questionRepository.deleteById(id);
     }
 
     public List<QuestionListDto> getAll() {
@@ -46,28 +68,14 @@ public class QuestionService {
     }
 
     public List<QuestionListDto> getByTopic(Long topicId) {
-        Topic root = topicRepository.findById(topicId)
-                .orElseThrow();
-
+        Topic root = topicRepository.findById(topicId).orElseThrow();
         Set<Long> topicIds = collectTopicIds(root);
-
         return questionRepository.findAllForListByTopics(topicIds);
-    }
-
-    private Set<Long> collectTopicIds(Topic topic) {
-        Set<Long> ids = new HashSet<>();
-        ids.add(topic.getId());
-
-        for (Topic child : topic.getChildren()) {
-            ids.addAll(collectTopicIds(child));
-        }
-
-        return ids;
     }
 
     public QuestionViewDto getQuestionById(Long id) {
         Question q = questionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Question not found: " + id));
         return new QuestionViewDto(
                 q.getId(),
                 q.getQuestionText(),
@@ -78,9 +86,32 @@ public class QuestionService {
         );
     }
 
-    private List<AnswerBlockDto> autoSplit(String raw) {
-        List<AnswerBlockDto> blocks = new ArrayList<>();
+    // ─── Вспомогательные методы ──────────────────────────────────────────────
 
+    /**
+     * Рекурсивно собирает id топика и всех его потомков.
+     * Используется для фильтрации вопросов по родительскому топику.
+     *
+     * Внимание: при глубоком дереве может вызвать N+1 запросов из-за lazy loading.
+     * TODO: переписать на JOIN FETCH или рекурсивный CTE когда топиков станет много.
+     */
+    private Set<Long> collectTopicIds(Topic topic) {
+        Set<Long> ids = new HashSet<>();
+        ids.add(topic.getId());
+        for (Topic child : topic.getChildren()) {
+            ids.addAll(collectTopicIds(child));
+        }
+        return ids;
+    }
+
+    /**
+     * Разбивает текст ответа на блоки: код и обычный текст.
+     * Используется для красивого рендеринга ответа в шаблоне.
+     */
+    private List<AnswerBlockDto> autoSplit(String raw) {
+        if (raw == null || raw.isBlank()) return List.of();
+
+        List<AnswerBlockDto> blocks = new ArrayList<>();
         String[] lines = raw.split("\\n");
         StringBuilder current = new StringBuilder();
         boolean currentIsCode = false;
@@ -88,7 +119,6 @@ public class QuestionService {
         for (String line : lines) {
             boolean isCode = looksLikeCode(line);
 
-            // если тип меняется — фиксируем предыдущий блок
             if (!current.isEmpty() && isCode != currentIsCode) {
                 blocks.add(new AnswerBlockDto(current.toString().trim(), currentIsCode));
                 current.setLength(0);
@@ -106,35 +136,12 @@ public class QuestionService {
     }
 
     private boolean looksLikeCode(String text) {
-        String trimmed = text.trim();
-
-        return trimmed.contains("{")
-                || trimmed.contains("}")
-                || trimmed.contains(";")
-                || trimmed.startsWith("class ")
-                || trimmed.startsWith("public ")
-                || trimmed.startsWith("def ")
-                || trimmed.startsWith("function ")
-                || trimmed.matches("(?s).*\\n.*\\n.*") // 3+ строк
-                || trimmed.startsWith("    ")
-                || trimmed.startsWith("\t");
-    }
-
-    @Transactional
-    public void update(Long id, QuestionForm form) {
-        Question q = questionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found"));
-
-        q.setQuestionText(form.questionText());
-        q.setAnswerText(form.answerText());
-        q.setTopic(form.topicId() != null
-                ? topicRepository.findById(form.topicId()).orElse(null)
-                : null
-        );
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        questionRepository.deleteById(id);
+        String t = text.trim();
+        return t.contains("{") || t.contains("}")
+                || t.contains(";")
+                || t.startsWith("class ") || t.startsWith("public ")
+                || t.startsWith("private ") || t.startsWith("protected ")
+                || t.startsWith("def ") || t.startsWith("function ")
+                || t.startsWith("    ") || t.startsWith("\t");
     }
 }

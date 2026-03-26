@@ -14,7 +14,8 @@ public interface SrsReviewRepository extends JpaRepository<SrsReview, Long> {
 
     Optional<SrsReview> findByItemTypeAndItemId(String itemType, Long itemId);
 
-    // Без фильтров
+    // ─── Выборка следующей карточки ──────────────────────────────────────────
+
     @Query("""
         select r from SrsReview r
         where r.archived = false
@@ -23,7 +24,6 @@ public interface SrsReviewRepository extends JpaRepository<SrsReview, Long> {
         """)
     List<SrsReview> findDueReviews(@Param("now") Instant now, Pageable pageable);
 
-    // Фильтр по типу (QUESTION / LANGUAGE_ITEM)
     @Query("""
         select r from SrsReview r
         where r.archived = false
@@ -37,7 +37,6 @@ public interface SrsReviewRepository extends JpaRepository<SrsReview, Long> {
             Pageable pageable
     );
 
-    // Фильтр по типу + топик (нативный SQL — itemId полиморфный)
     @Query(value = """
         select r.* from srs_reviews r
         join questions q on r.item_id = q.id
@@ -68,7 +67,8 @@ public interface SrsReviewRepository extends JpaRepository<SrsReview, Long> {
             @Param("topicId") Long topicId
     );
 
-    // Счётчики
+    // ─── Счётчики ────────────────────────────────────────────────────────────
+
     @Query("""
         select count(r) from SrsReview r
         where r.archived = false
@@ -85,6 +85,32 @@ public interface SrsReviewRepository extends JpaRepository<SrsReview, Long> {
     long countDueReviewsByType(
             @Param("now") Instant now,
             @Param("itemType") String itemType
+    );
+
+    @Query(value = """
+        select count(*) from srs_reviews r
+        join questions q on r.item_id = q.id
+        where r.item_type = 'QUESTION'
+          and r.archived = false
+          and r.next_review_at <= :now
+          and q.topic_id = :topicId
+        """, nativeQuery = true)
+    long countDueQuestionsByTopic(
+            @Param("now") Instant now,
+            @Param("topicId") Long topicId
+    );
+
+    @Query(value = """
+        select count(*) from srs_reviews r
+        join languages_items l on r.item_id = l.id
+        where r.item_type = 'LANGUAGE_ITEM'
+          and r.archived = false
+          and r.next_review_at <= :now
+          and l.topic_id = :topicId
+        """, nativeQuery = true)
+    long countDueLanguageItemsByTopic(
+            @Param("now") Instant now,
+            @Param("topicId") Long topicId
     );
 
     @Query("""

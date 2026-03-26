@@ -23,17 +23,10 @@ public class SrsReviewService {
 
     // ─── Выборка ────────────────────────────────────────────────────────────
 
-    /**
-     * Следующая карточка с учётом фильтров.
-     *
-     * @param itemType  null = все, "QUESTION" или "LANGUAGE_ITEM"
-     * @param topicId   null = все топики
-     */
     @Transactional(readOnly = true)
     public Optional<SrsReview> nextDue(String itemType, Long topicId) {
         Instant now = Instant.now();
 
-        // Фильтр по топику — используем нативные запросы
         if (topicId != null) {
             if ("QUESTION".equals(itemType)) {
                 return reviewRepository.findDueQuestionByTopic(now, topicId);
@@ -43,25 +36,47 @@ public class SrsReviewService {
             }
         }
 
-        // Фильтр только по типу
         if (itemType != null) {
             return reviewRepository
                     .findDueReviewsByType(now, itemType, PageRequest.of(0, 1))
                     .stream().findFirst();
         }
 
-        // Без фильтров
         return reviewRepository
                 .findDueReviews(now, PageRequest.of(0, 1))
                 .stream().findFirst();
     }
 
+    /**
+     * Счётчик карточек с учётом всех фильтров.
+     * itemType = null, topicId = null → все карточки
+     * itemType = QUESTION, topicId = null → все вопросы
+     * itemType = QUESTION, topicId = 5 → вопросы в топике 5
+     */
+    @Transactional(readOnly = true)
+    public long countDue(String itemType, Long topicId) {
+        Instant now = Instant.now();
+
+        if (topicId != null) {
+            if ("QUESTION".equals(itemType)) {
+                return reviewRepository.countDueQuestionsByTopic(now, topicId);
+            }
+            if ("LANGUAGE_ITEM".equals(itemType)) {
+                return reviewRepository.countDueLanguageItemsByTopic(now, topicId);
+            }
+        }
+
+        if (itemType != null) {
+            return reviewRepository.countDueReviewsByType(now, itemType);
+        }
+
+        return reviewRepository.countDueReviews(now);
+    }
+
+    // Обратная совместимость для StudyController (Thymeleaf)
     @Transactional(readOnly = true)
     public long countDue(String itemType) {
-        if (itemType != null) {
-            return reviewRepository.countDueReviewsByType(Instant.now(), itemType);
-        }
-        return reviewRepository.countDueReviews(Instant.now());
+        return countDue(itemType, null);
     }
 
     @Transactional(readOnly = true)

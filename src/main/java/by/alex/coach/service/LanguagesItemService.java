@@ -22,8 +22,9 @@ public class LanguagesItemService {
     private final TopicRepository topicRepository;
     private final SrsReviewService reviewService;
 
-    @Autowired
-    public LanguagesItemService(LanguagesItemRepository languagesItemRepository, TopicRepository topicRepository, SrsReviewService reviewService) {
+    public LanguagesItemService(LanguagesItemRepository languagesItemRepository,
+                                TopicRepository topicRepository,
+                                SrsReviewService reviewService) {
         this.languagesItemRepository = languagesItemRepository;
         this.topicRepository = topicRepository;
         this.reviewService = reviewService;
@@ -32,8 +33,8 @@ public class LanguagesItemService {
     public void create(LanguagesItemForm form) {
         LanguagesItem item = new LanguagesItem();
         item.setTopic(Optional.ofNullable(form.topicId())
-                .map(topicId -> topicRepository.findById(topicId)
-                        .orElseThrow(() -> new IllegalArgumentException("Topic is not found")))
+                .map(id -> topicRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Topic not found: " + id)))
                 .orElse(null));
         item.setLanguage(form.language());
         item.setType(form.type());
@@ -45,20 +46,25 @@ public class LanguagesItemService {
                 .orElse(null));
 
         languagesItemRepository.save(item);
-        //reviewService.getOrCreate("LANGUAGE_ITEM", item.getId());
+
+        // Автоматически создаём SRS-запись — слово сразу попадает в очередь изучения
+        reviewService.getOrCreate("LANGUAGE_ITEM", item.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<LanguagesItemListDto> getAll() {
         return languagesItemRepository.findAllForList();
     }
 
+    @Transactional(readOnly = true)
     public List<LanguagesItemListDto> getByTopic(Long topicId) {
         return languagesItemRepository.findAllForListByTopic(topicId);
     }
 
+    @Transactional(readOnly = true)
     public LanguagesItemViewDto getItemsById(Long id) {
         LanguagesItem item = languagesItemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Not found"));
+                .orElseThrow(() -> new IllegalArgumentException("LanguagesItem not found: " + id));
         return new LanguagesItemViewDto(
                 item.getId(),
                 item.getLanguage(),

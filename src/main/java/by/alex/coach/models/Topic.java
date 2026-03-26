@@ -11,6 +11,7 @@ import java.util.List;
         @UniqueConstraint(name = "uq_topic_name_parent", columnNames = {"name", "parent_id"})
 })
 public class Topic {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,36 +27,21 @@ public class Topic {
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<Topic> children = new ArrayList<>();
 
+    @Column(name = "type", nullable = false)
+    private String type = "GENERAL";   // GENERAL | LANGUAGE
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public Topic getParent() { return parent; }
+    public void setParent(Topic parent) { this.parent = parent; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public List<Topic> getChildren() { return children; }
+    public void setChildren(List<Topic> children) { this.children = children; }
 
-    public Topic getParent() {
-        return parent;
-    }
-
-    public void setParent(Topic parent) {
-        this.parent = parent;
-    }
-
-    public List<Topic> getChildren() {
-        return children;
-    }
-
-    public void setChildren(List<Topic> children) {
-        this.children = children;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 }

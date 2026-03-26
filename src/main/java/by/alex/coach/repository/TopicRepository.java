@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findByParentIsNull();
+    List<Topic> findByParentIsNullAndType(String type);
     List<Topic> findByParentId(Long id);
 }
